@@ -38,6 +38,13 @@ describe Oystercard do
       expect { card.touch_in(station) }.to raise_error "Your balance is below the minimum fare of £#{described_class::MINIMUM_FARE}, please top up"
     end
 
+    it "should set exit station to nil" do
+      maxxed_card.touch_in(station)
+      maxxed_card.touch_out(station)
+      maxxed_card.touch_in(station)
+      expect(maxxed_card.exit_station).to eq nil
+    end
+
     it "should update the station touched in at" do
       maxxed_card.touch_in(station)
       expect(maxxed_card.entry_station).to eq station
@@ -47,19 +54,33 @@ describe Oystercard do
   describe "#touch_out" do
     it "should change in_journey? to false" do
       maxxed_card.touch_in(station)
-      maxxed_card.touch_out
+      maxxed_card.touch_out(station)
       expect(maxxed_card).to_not be_in_journey
     end
 
     it "should deduct fare" do
       maxxed_card.touch_in(station)
-      expect { maxxed_card.touch_out }.to change { maxxed_card.balance }.by -described_class::MINIMUM_FARE
+      expect { maxxed_card.touch_out(station) }.to change { maxxed_card.balance }.by -described_class::MINIMUM_FARE
     end
 
     it "should reset entry station to nil" do
       maxxed_card.touch_in(station)
-      maxxed_card.touch_out
+      maxxed_card.touch_out(station)
       expect(maxxed_card.entry_station).to eq nil
+    end
+
+    it "should update the exit station" do
+      maxxed_card.touch_in(station)
+      maxxed_card.touch_out(station)
+      expect(maxxed_card.exit_station).to eq station
+    end
+  end
+
+  describe "#journeys" do
+    it "should provide a list of the users past journeys" do
+      maxxed_card.touch_in(station)
+      maxxed_card.touch_out(station)
+      expect(maxxed_card.journeys).to eq [{:entry_station => station, :exit_station => station}]
     end
   end
 end
