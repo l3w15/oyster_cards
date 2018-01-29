@@ -21,12 +21,6 @@ describe Oystercard do
     end
   end
 
-  describe "#deduct" do
-    it "should deduct the balance by specified amount" do
-      expect { maxxed_card.deduct 20 }.to change { maxxed_card.balance }.by -20
-    end
-  end
-
   describe "#in_journey?" do
     it "outputs a true/false return value" do
       expect(card).not_to be_in_journey
@@ -49,6 +43,11 @@ describe Oystercard do
       maxxed_card.touch_in
       maxxed_card.touch_out
       expect(maxxed_card).to_not be_in_journey
+    end
+
+    it "should deduct fare" do
+      maxxed_card.touch_in
+      expect { maxxed_card.touch_out }.to change { maxxed_card.balance }.by -described_class::MINIMUM_FARE
     end
   end
 end
